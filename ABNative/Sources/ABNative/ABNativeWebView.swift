@@ -32,6 +32,9 @@ public struct ABNativeWebView: UIViewRepresentable {
         configuration.defaultWebpagePreferences = preferences
         
         self.webView = WKWebView(frame: CGRect.zero, configuration: configuration)
+        if #available(iOS 16.4, *) {
+            self.webView.isInspectable = true
+        }
         self.webView.allowsBackForwardNavigationGestures = true
         self.webView.scrollView.isScrollEnabled = true
     }
@@ -57,17 +60,21 @@ public struct ABNativeWebView: UIViewRepresentable {
         } else {
             let base_Url = Bundle.main.url(forResource: "WebApp", withExtension: nil)
             let header_Url = Bundle.main.url(forResource: "cache/abWeb/web/header.html", withExtension: nil, subdirectory: "WebApp")
-            let postBodyInit_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBodyInit.html", withExtension: nil, subdirectory: "WebApp")
+            let header_Scripts_Url = Bundle.main.url(forResource: "cache/abWeb/web/header_Scripts.html", withExtension: nil, subdirectory: "WebApp")
+            let postBody_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBody.html", withExtension: nil, subdirectory: "WebApp")
+            let postBody_Scripts_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBody_Scripts.html", withExtension: nil, subdirectory: "WebApp")
             let index_Url = Bundle.main.url(forResource: "index.base.html", withExtension: nil, subdirectory: "WebApp")
 
             let base = base_Url?.absoluteString.replacingOccurrences(of: "file:///", with: "/")
 
             do {
                 var header = try String(contentsOf: header_Url!, encoding: .utf8)
+                header += try String(contentsOf: header_Scripts_Url!, encoding: .utf8)
                 header = header.replacingOccurrences(of: "{{base}}", with: base!)
                 
-                var postBodyInit = try String(contentsOf: postBodyInit_Url!, encoding: .utf8)
-                postBodyInit = postBodyInit.replacingOccurrences(of: "{{base}}", with: base!)
+                var postBody = try String(contentsOf: postBody_Url!, encoding: .utf8)
+                postBody += try String(contentsOf: postBody_Scripts_Url!, encoding: .utf8)
+                postBody = postBody.replacingOccurrences(of: "{{base}}", with: base!)
 
                 var debug = "false";
                 if (ProcessInfo().environment["BuildType_Debug"] != nil) {
@@ -77,7 +84,7 @@ public struct ABNativeWebView: UIViewRepresentable {
                 var index = try String(contentsOf: index_Url!, encoding: .utf8)
                 index = index.replacingOccurrences(of: "{{base}}", with: base!)
                 index = index.replacingOccurrences(of: "{{header}}", with: header)
-                index = index.replacingOccurrences(of: "{{postBodyInit}}", with: postBodyInit)
+                index = index.replacingOccurrences(of: "{{postBody}}", with: postBody)
                 index = index.replacingOccurrences(of: "{{debug}}", with: debug)
 
                 self.webView.loadHTMLString(index, baseURL: base_Url)
@@ -156,6 +163,10 @@ public struct ABNativeWebView: UIViewRepresentable {
                 print("On reload?")
                 
                 self.parent.reload()
+            } else if (messageType == "webViewInitialized") {
+                print("On webViewInitialized?")
+                
+                self.parent.nativeApp.webViewInitialized()
             }
         }
         

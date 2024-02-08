@@ -84,4 +84,8 @@ public class ABNativeApp
         self.onWebResultInfos.removeValue(forKey: actionId)
     }
     
+    public func webViewInitialized() {
+        print("Web View Initialized")
+    }
+    
 }
