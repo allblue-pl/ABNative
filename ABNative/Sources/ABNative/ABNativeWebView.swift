@@ -54,6 +54,7 @@ public struct ABNativeWebView: UIViewRepresentable {
         /* Debug */
         if (self.debugUrl != nil) {
             if let url = URL(string: self.debugUrl ?? "") {
+                print("Testing: " + (self.debugUrl ?? "NIL"))
                 self.webView.load(URLRequest(url: url))
             }
         /* Release */
@@ -122,31 +123,39 @@ public struct ABNativeWebView: UIViewRepresentable {
         public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             guard let args = message.body as? [String: AnyObject],
                   let messageType = args["messageType"] as? String else {
-                assert(true, "Cannot process script message.")
+                assertionFailure("Cannot process script message.")
                 return
             }
             
             if (messageType == "callNative") {
                 guard let actionId = args["actionId"] as? Int,
                       let actionSetName = args["actionsSetName"] as? String,
-                      let actionName = args["actionName"] as? String,
-                      let actionArgs = args["actionArgs"] as? [String: AnyObject] else {
+                      let actionName = args["actionName"] as? String else {
                     self.parent.nativeApp.errorNative("Cannot parse 'callNative' args.")
                     return
+                }
+                
+                var actionArgs: [String: AnyObject]?
+                if (args["actionArgs"] is NSNull) {
+                    actionArgs = nil
+                } else {
+                    guard let v = args["actionArgs"] as? [String: AnyObject] else {
+                        parent.nativeApp.errorNative("Cannot parse 'callNative' action args.")
+                        return
+                    }
+                    actionArgs = v
                 }
                 
                 self.parent.nativeApp.callNative(actionId, actionSetName, actionName, actionArgs)
             } else if (messageType == "onWebResult") {
                 guard let actionId = args["actionId"] as? Int,
-                      let result = args["result"] as? [String: AnyObject] else {
+                      let result = args["result"] as? [String: AnyObject]? else {
                     self.parent.nativeApp.errorNative("Cannot parse 'onWebResult' result.")
                     return
                 }
                 
                 self.parent.nativeApp.onWebResult(actionId, result)
             } else if (messageType == "onError") {
-                print("On error?")
-                
                 guard let error = args["error"] as? [String: AnyObject] else {
                     print("Cannot parse JS Error.")
                     return
@@ -160,12 +169,8 @@ public struct ABNativeWebView: UIViewRepresentable {
                 }
                 print("JS Error: " + (errorStack ?? "unknown"))
             } else if (messageType == "reload") {
-                print("On reload?")
-                
                 self.parent.reload()
             } else if (messageType == "webViewInitialized") {
-                print("On webViewInitialized?")
-                
                 self.parent.nativeApp.webViewInitialized()
             }
         }

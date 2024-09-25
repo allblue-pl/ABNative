@@ -34,7 +34,7 @@ public class ABNativeAction {
         } else if (self.callFn_Async != nil) {
             self.callFn_Async!(actionArgs, actionResult)
         } else {
-            assert(true, "Unknown callFn type.")
+            assertionFailure("Unknown callFn type.")
         }
     }
     
