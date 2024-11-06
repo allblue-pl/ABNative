@@ -53,36 +53,36 @@ public class ABNativeApp
     }
     
     public func callNative(_ actionId: Int, _ actionsSetName: String, _ actionName: String, _ actionArgs: [String: AnyObject]?) {
-        // Should be using gurds!
-        
-        guard let actionsSet = self.actionsSets[actionsSetName] else {
-            onNativeResult(actionId, actionsSetName, actionName, nil, "Native Actions Set '\(actionsSetName)' not implemented.")
-            return
-        }
-        
-        guard let actionPair = actionsSet.getNative(actionName) else {
-            onNativeResult(actionId, actionsSetName, actionName, nil, "Native Action '\(actionsSetName):\(actionName)' not implemented.")
-            return
-        }
-        
-        let result: [String: AnyObject]?
-        if let action = actionPair.action {
-            do {
-                result = try action(actionArgs)
-                onNativeResult(actionId, actionsSetName, actionName, result, nil)
-            } catch {
-                errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
-                print(error)
-                onNativeResult(actionId, actionsSetName, actionName, nil, "Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+        queue.sync {
+            guard let actionsSet = self.actionsSets[actionsSetName] else {
+                onNativeResult(actionId, actionsSetName, actionName, nil, "Native Actions Set '\(actionsSetName)' not implemented. Cannot call '\(actionsSetName):\(actionName)'.")
+                return
             }
             
-        } else if let callbackAction = actionPair.callbackAction {
-            callbackAction(actionArgs) { result in
-                self.onNativeResult(actionId, actionsSetName, actionName, result, nil)
-            } _: { error in
-                self.errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
-                print(error)
-                self.onNativeResult(actionId, actionsSetName, actionName, nil, "Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+            guard let actionPair = actionsSet.getNative(actionName) else {
+                onNativeResult(actionId, actionsSetName, actionName, nil, "Native Action '\(actionsSetName):\(actionName)' not implemented.")
+                return
+            }
+            
+            let result: [String: AnyObject]?
+            if let action = actionPair.action {
+                do {
+                    result = try action(actionArgs)
+                    onNativeResult(actionId, actionsSetName, actionName, result, nil)
+                } catch {
+                    errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+                    print(error)
+                    onNativeResult(actionId, actionsSetName, actionName, nil, "Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+                }
+                
+            } else if let callbackAction = actionPair.callbackAction {
+                callbackAction(actionArgs) { result in
+                    self.onNativeResult(actionId, actionsSetName, actionName, result, nil)
+                } _: { error in
+                    self.errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+                    print(error)
+                    self.onNativeResult(actionId, actionsSetName, actionName, nil, "Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+                }
             }
         }
     }
@@ -125,26 +125,30 @@ public class ABNativeApp
     }
     
     public func errorMessage(_ error: String) {
-        print(error)
-        if let errorCallback {
-            errorCallback(error)
+        queue.sync {
+            print("ABNativeApp Error ->", error)
+            if let errorCallback {
+                errorCallback(error)
+            }
+            self.evaluateJS.send("abNative.errorNative(\"\(error)\")")
         }
-        self.evaluateJS.send("abNative.errorNative(\"\(error)\")")
     }
     
     public func onWebResult(_ actionId: Int, _ result: [String: AnyObject]?, _ error: String?) {
-        guard let webResultCallback = self.webResultCallbacks[actionId] else {
-            errorMessage("ABNativeApp Error -> Cannot find action '\(actionId)' callback.")
-            return
+        queue.sync {
+            guard let webResultCallback = self.webResultCallbacks[actionId] else {
+                errorMessage("ABNativeApp Error -> Cannot find action '\(actionId)' callback.")
+                return
+            }
+            
+            self.webResultCallbacks.removeValue(forKey: actionId)
+            
+            if let error {
+                webResultCallback.onWebError(error)
+            } else {
+                webResultCallback.onWebResult(result)
+            }
         }
-        
-        if let error {
-            webResultCallback.onWebError(error)
-        } else {
-            webResultCallback.onWebResult(result)
-        }
-        
-        self.webResultCallbacks.removeValue(forKey: actionId)
     }
     
     public func webViewInitialized() {

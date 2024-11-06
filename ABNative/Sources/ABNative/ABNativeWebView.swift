@@ -1,9 +1,3 @@
-//
-//  WebView.swift
-//  Alta Associations
-//
-//  Created by Jakub Zolcik on 17/03/2021.
-//
 
 import Combine
 import Foundation

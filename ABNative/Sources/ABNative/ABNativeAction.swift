@@ -1,9 +1,3 @@
-//
-//  ABNativeAction.swift
-//  Alta Associations
-//
-//  Created by Jakub Zolcik on 20/03/2021.
-//
 
 import Foundation
 

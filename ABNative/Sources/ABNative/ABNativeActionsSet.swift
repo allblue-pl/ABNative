@@ -10,15 +10,13 @@ open class ABNativeActionsSet {
         self.actions = [String: ABNativeActionPair]()
     }
     
-    public func addNative(_ actionName: String, execute action: @escaping (_ args: [String: AnyObject]?) -> [String: AnyObject]?) -> ABNativeActionsSet {
+    public func addNative(_ actionName: String, execute action: @escaping (_ args: [String: AnyObject]?) throws -> [String: AnyObject]?) -> ABNativeActionsSet {
         if actions.index(forKey: actionName) != nil {
             assertionFailure("Action '" + actionName + "' already exists.")
             return self
         }
         
-        ABNativeActionPair(action: action, callbackAction: nil)
-        
-        actions[actionName] = nil
+        actions[actionName] = ABNativeActionPair(action: action, callbackAction: nil)
         
         return self
     }
@@ -48,6 +46,6 @@ open class ABNativeActionsSet {
 
 
 public struct ABNativeActionPair {
-    let action: ((_ args: [String: AnyObject]?) -> [String: AnyObject]?)?
+    let action: ((_ args: [String: AnyObject]?) throws -> [String: AnyObject]?)?
     let callbackAction: ((_ args: [String: AnyObject]?, _ onResult: @escaping (_ result: [String: AnyObject]?) -> Void, _ onError: @escaping (_ error: Error) -> Void) -> Void)?
 }
