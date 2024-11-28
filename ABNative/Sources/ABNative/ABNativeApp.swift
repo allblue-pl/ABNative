@@ -70,7 +70,7 @@ public class ABNativeApp
                     result = try action(actionArgs)
                     onNativeResult(actionId, actionsSetName, actionName, result, nil)
                 } catch {
-                    errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+//                    errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
                     print(error)
                     onNativeResult(actionId, actionsSetName, actionName, nil, "Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
                 }
@@ -79,7 +79,7 @@ public class ABNativeApp
                 callbackAction(actionArgs) { result in
                     self.onNativeResult(actionId, actionsSetName, actionName, result, nil)
                 } _: { error in
-                    self.errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
+//                    self.errorMessage("Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
                     print(error)
                     self.onNativeResult(actionId, actionsSetName, actionName, nil, "Error when calling '\(actionsSetName):\(actionName)': " + error.localizedDescription)
                 }

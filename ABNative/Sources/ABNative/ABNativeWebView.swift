@@ -6,11 +6,12 @@ import UIKit
 import WebKit
 
 public struct ABNativeWebView: UIViewRepresentable {
+    
     public let nativeApp: ABNativeApp
+    public let webView: WKWebView
+    
     private let debugUrl: String?
     
-    
-    public let webView: WKWebView
     
     public init(_ nativeApp: ABNativeApp, debugUrl: String?) {
         self.nativeApp = nativeApp
@@ -47,9 +48,11 @@ public struct ABNativeWebView: UIViewRepresentable {
     
     public func reload() {
         /* Debug */
-        if (self.debugUrl != nil) {
-            if let url = URL(string: self.debugUrl ?? "") {
-                self.webView.load(URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData))
+        if (debugUrl != nil) {
+            if let url = URL(string: debugUrl ?? "") {
+                webView.load(URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData))
+            } else {
+                print("ABNativeWebView -> Cannot parse 'debugUrl': \(debugUrl)")
             }
         /* Release */
         } else {
@@ -188,7 +191,6 @@ public struct ABNativeWebView: UIViewRepresentable {
         }
         
         public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-            
         }
         
         public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
@@ -199,8 +201,12 @@ public struct ABNativeWebView: UIViewRepresentable {
             })
         }
         
-        public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-
+        public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+            print("ABNativeWebView -> Error loading: '" + (parent.debugUrl ?? "<local>") + "' -> \(error)")
+        }
+        
+        public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+            print("ABNativeWebView -> Error loading: '" + (parent.debugUrl ?? "<local>") + "' -> \(error)")
         }
         
     }
