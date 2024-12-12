@@ -25,7 +25,7 @@ public class ABNativeApp
     public var evaluateJS = PassthroughSubject<String, Never>()
     
     
-    public init(execute errorCallback: ((_ error: String) -> Void)? = nil) {
+    public init(errorCallback: ((_ error: String) -> Void)? = nil) {
         self.errorCallback = errorCallback
         
         self.queue = DispatchQueue(label: "ABNativeApp.queue", attributes: .concurrent)
@@ -87,7 +87,7 @@ public class ABNativeApp
         }
     }
     
-    public func callWeb(_ actionsSetName: String, _ actionName: String, _ actionArgs: [String: AnyObject]? = nil, execute onWebResult: @escaping (_ result: [String: AnyObject]?) -> Void, execute onWebError: @escaping (_ error: String) -> Void) {
+    public func callWeb(_ actionsSetName: String, _ actionName: String, _ actionArgs: [String: AnyObject]? = nil, onWebResult: @escaping (_ result: [String: AnyObject]?) -> Void, onWebError: @escaping (_ error: String) -> Void) {
         queue.sync {
             lock.lock()
             
@@ -158,7 +158,7 @@ public class ABNativeApp
             lock.unlock()
             
             webView_Init_WebCalls.forEach{ wc in
-                callWeb(wc.actionsSetName, wc.actionName, wc.actionArgs, execute: wc.onWebResult, execute: wc.onWebError)
+                callWeb(wc.actionsSetName, wc.actionName, wc.actionArgs, onWebResult: wc.onWebResult, onWebError: wc.onWebError)
             }
         }
     }
