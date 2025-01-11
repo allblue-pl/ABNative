@@ -12,10 +12,13 @@ public struct ABNativeWebView: UIViewRepresentable {
     
     private let debugUrl: String?
     
+    private let webAppSubdirectory: String
     
-    public init(_ nativeApp: ABNativeApp, debugUrl: String?) {
+    
+    public init(_ nativeApp: ABNativeApp, debugUrl: String?, webAppSubdirectory: String) {
         self.nativeApp = nativeApp
         self.debugUrl = debugUrl
+        self.webAppSubdirectory = webAppSubdirectory
         
         let preferences = WKWebpagePreferences()
         preferences.allowsContentJavaScript = true
@@ -56,15 +59,15 @@ public struct ABNativeWebView: UIViewRepresentable {
             }
         /* Release */
         } else {
-            let base_Url = Bundle.main.url(forResource: "WebApp", withExtension: nil)
-            let header_Url = Bundle.main.url(forResource: "cache/abWeb/web/header.html", withExtension: nil, subdirectory: "WebApp")
-            let header_Scripts_Url = Bundle.main.url(forResource: "cache/abWeb/web/header_Scripts.html", withExtension: nil, subdirectory: "WebApp")
-            let postBody_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBody.html", withExtension: nil, subdirectory: "WebApp")
-            let postBody_Scripts_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBody_Scripts.html", withExtension: nil, subdirectory: "WebApp")
-            let index_Url = Bundle.main.url(forResource: "index.base.html", withExtension: nil, subdirectory: "WebApp")
+            let base_Url = Bundle.main.url(forResource: webAppSubdirectory, withExtension: nil)
+            let header_Url = Bundle.main.url(forResource: "cache/abWeb/web/header", withExtension: "html", subdirectory: webAppSubdirectory)
+            let header_Scripts_Url = Bundle.main.url(forResource: "cache/abWeb/web/header_Scripts", withExtension: "html", subdirectory: webAppSubdirectory)
+            let postBody_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBody.html", withExtension: nil, subdirectory: webAppSubdirectory)
+            let postBody_Scripts_Url = Bundle.main.url(forResource: "cache/abWeb/web/postBody_Scripts.html", withExtension: nil, subdirectory: webAppSubdirectory)
+            let index_Url = Bundle.main.url(forResource: "index.base.html", withExtension: nil, subdirectory: webAppSubdirectory)
 
             let base = base_Url?.absoluteString.replacingOccurrences(of: "file:///", with: "/")
-
+            
             do {
                 var header = try String(contentsOf: header_Url!, encoding: .utf8)
                 header += try String(contentsOf: header_Scripts_Url!, encoding: .utf8)
@@ -97,7 +100,7 @@ public struct ABNativeWebView: UIViewRepresentable {
         
 //        print("Test: " + Bundle.main.bundleURL.absoluteString)
         
-//        let url = Bundle.main.url(forResource: "index.base", withExtension: "html", subdirectory: "WebApp")
+//        let url = Bundle.main.url(forResource: "index.base", withExtension: "html", subdirectory: webAppSubdirectory)
         
 //        print("Testing \(url)")
 //        let request = URLRequest(url: url!)
