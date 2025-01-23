@@ -10,7 +10,7 @@ open class ABNativeActionsSet {
         self.actions = [String: ABNativeActionPair]()
     }
     
-    public func addNative(_ actionName: String, execute action: @escaping (_ args: [String: AnyObject]?) throws -> [String: AnyObject]?) -> ABNativeActionsSet {
+    public func addNative(_ actionName: String, action: @escaping (_ args: [String: AnyObject]?) throws -> [String: AnyObject]?) -> ABNativeActionsSet {
         if actions.index(forKey: actionName) != nil {
             assertionFailure("Action '" + actionName + "' already exists.")
             return self
@@ -21,7 +21,7 @@ open class ABNativeActionsSet {
         return self
     }
     
-    public func addNativeCallback(_ actionName: String, execute callbackAction: @escaping (_ args: [String: AnyObject]?, _ onResult: @escaping (_ result: [String: AnyObject]?) -> Void, _ onError: @escaping (_ error: Error) -> Void) -> Void) -> ABNativeActionsSet {
+    public func addNativeCallback(_ actionName: String, callbackAction: @escaping (_ args: [String: AnyObject]?, _ onResult: @escaping (_ result: [String: AnyObject]?) -> Void, _ onError: @escaping (_ error: Error) -> Void) -> Void) -> ABNativeActionsSet {
         if actions.index(forKey: actionName) != nil {
             assertionFailure("Action '" + actionName + "' already exists.")
             return self
@@ -32,8 +32,7 @@ open class ABNativeActionsSet {
         return self
     }
     
-    public func getNative(_ actionName: String) -> ABNativeActionPair?
-    {
+    public func getNative(_ actionName: String) -> ABNativeActionPair? {
         if let action = actions[actionName] {
             return action
         }
@@ -41,7 +40,6 @@ open class ABNativeActionsSet {
         assertionFailure("Action '\(actionName)' does not exist.")
         return nil
     }
-    
 }
 
 

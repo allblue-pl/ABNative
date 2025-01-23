@@ -2,12 +2,6 @@
 import Foundation
 
 public class ABNativeAction {
-    static public func jsonArgsError() -> [String: AnyObject] {
-        var result = [String: AnyObject]()
-        result["_ABNativeJSONArgsError"] = "Cannot parse args from json." as AnyObject
-        return result
-    }
-    
     private let callFn: (([String: AnyObject]) -> [String: AnyObject])?
     private let callFn_Async: (([String: AnyObject], Result) -> Void)?
     
